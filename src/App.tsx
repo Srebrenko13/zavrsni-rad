@@ -14,19 +14,20 @@ function App() {
       <body>
       <div className= "body">
           <h1 className="title">Chapter {chapter}: Title</h1>
-          <p className="text-center">Once upon a time, in a quaint village surrounded by rolling hills and lush meadows, lived a little boy named Tado. Tado was known for his boundless curiosity and infectious laughter that brought joy to everyone around him. He had a knack for finding adventure in the most ordinary places, whether it was a hidden nook in his grandmother's garden or a secret path through the village woods.</p>
+          <p className="text-center">Welcome to Nova Prime, a futuristic city located on the distant planet of Xerion. As a new resident, you quickly discover that the city holds many secrets and hidden agendas among its glittering skyscrapers and advanced technology.</p>
+          <div className="image"><img src="./TestImage.png" alt="Nova Prime" /></div>
           <div className="center option-field">
               <div className="center option">
                   <button className="center button">1</button>
-                  <p>Option 1</p>
+                  <p>Join a rebel group seeking to overthrow the corrupt government.</p>
               </div>
               <div className="center option">
                   <button className="center button">2</button>
-                  <p>Option 2</p>
+                  <p>Work for a powerful corporation to gain insider knowledge.</p>
               </div>
               <div className="center option">
                   <button className="center button">3</button>
-                  <p>Option 3</p>
+                  <p>Explore the city's underground network to find the truth.</p>
               </div>
           </div>
       </div>
