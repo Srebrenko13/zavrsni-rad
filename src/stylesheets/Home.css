@@ -1,0 +1,17 @@
+.play_box{
+    width: fit-content;
+    height: fit-content;
+    align-self: center;
+    align-items: center;
+    justify-self: center;
+    justify-content: center;
+    justify-items: center;
+    margin: 100px;
+    padding: 100px;
+}
+
+.start_button{
+    align-self: center;
+    align-items: center;
+    justify-self: center;
+}
