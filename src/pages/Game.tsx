@@ -4,6 +4,8 @@ import {StoryModel} from "../models/StoryModel";
 import OpenAI from "openai";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import {useNavigate} from "react-router-dom";
+import {Box, Card, LinearProgress} from "@mui/material";
+import '../stylesheets/Game.css'
 
 function App() {
     const navigate = useNavigate();
@@ -38,7 +40,7 @@ function App() {
     }
 
     useEffect(() => {
-        const storage = localStorage.getItem('game_data')
+        const storage = localStorage.getItem('game_data');
         let game: any;
         if(storage){
             game = JSON.parse(storage);
@@ -61,23 +63,23 @@ function App() {
     }
 
   return (
-    <div className="app">
-      <div className= "body">
+    <Box>
+      <Card className= "body">
           <h1 className="title">Chapter {chapter}: {description}</h1>
           <p className="text-center">{story}</p>
           <div className="image"><img src={picture} alt="Nema slike, sirotinja smo!" /></div>
           {!game_finished && (
-              <div className="center option-field">
+              <div className="center option-field" hidden={game_finished}>
                   <div className="center option">
-                      <button onClick={generateNewChapter} className="center button">1</button>
+                      <button onClick={generateNewChapter} className="center button" disabled={loading}>1</button>
                       <p>{option_1}</p>
                   </div>
-                  <div className="center option" hidden={game_finished}>
-                      <button onClick={generateNewChapter} className="center button">2</button>
+                  <div className="center option">
+                      <button onClick={generateNewChapter} className="center button" disabled={loading}>2</button>
                       <p>{option_2}</p>
                   </div>
-                  <div className="center option" hidden={game_finished}>
-                      <button onClick={generateNewChapter} className="center button">3</button>
+                  <div className="center option">
+                      <button onClick={generateNewChapter} className="center button" disabled={loading}>3</button>
                       <p>{option_3}</p>
                   </div>
               </div>
@@ -88,15 +90,11 @@ function App() {
                   <button className="center end_button" onClick={goHome}>End game</button>
               </div>
           )}
-      </div>
-        {loading && (
-            <div className="loading_overlay">
-                <div className="loading_message">
-                    <p>Loading...</p>
-                </div>
-            </div>
-        )}
-    </div>
+          {loading && (
+              <LinearProgress/>
+          )}
+      </Card>
+    </Box>
   );
 }
 

@@ -12,21 +12,21 @@ function App() {
 
 
   return (
-      <>
-        <Header/>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/">
-                <Route index element={<Home/>}/>
-                <Route path="home" element={<Home/>}/>
-                <Route path="game" element={<Game/>}/>
-                <Route path="login" element={<Login/>}/>
-                <Route path="register" element={<Register/>}/>
-            </Route>
-          </Routes>
-        </BrowserRouter>
-        <Footer/>
-      </>
+      <div className="app">
+            <Header/>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/">
+                    <Route index element={<Home/>}/>
+                    <Route path="home" element={<Home/>}/>
+                    <Route path="game" element={<Game/>}/>
+                    <Route path="login" element={<Login/>}/>
+                    <Route path="register" element={<Register/>}/>
+                </Route>
+              </Routes>
+            </BrowserRouter>
+            <Footer/>
+      </div>
   );
 }
 
