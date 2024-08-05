@@ -1,6 +1,6 @@
 .box{
     width: fit-content;
-    margin: auto;
+    margin: 50px auto;
 }
 
 .card{
@@ -29,4 +29,10 @@
     justify-items: center;
     display: flex;
     flex-direction: row;
+}
+
+.loading_overlay{
+    width: 80%;
+    padding: 20px;
+    align-items: center;
 }
