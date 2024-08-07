@@ -64,7 +64,7 @@ function App() {
 
   return (
     <Box>
-      <Card className= "body">
+      <Card className="body">
           <h1 className="title">Chapter {chapter}: {description}</h1>
           <p className="text-center">{story}</p>
           <div className="image"><img src={picture} alt="Nema slike, sirotinja smo!" /></div>

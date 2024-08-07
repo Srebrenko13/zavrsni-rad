@@ -13,6 +13,10 @@ import {
 import '../stylesheets/LoginAndRegister.css';
 import {PersonAdd, Visibility, VisibilityOff} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
+import {RegisterInfo} from "../models/RegisterInfo";
+import axios from "axios";
+import {AccountData} from "../models/AccountData";
+import {hashSync} from "bcrypt-ts";
 
 function Register() {
 
@@ -33,6 +37,8 @@ function Register() {
     const[mismatchError, setMismatchError] = useState(false);
     const[invalidEmail, setInvalidEmail] = useState(false);
     const[invalidPassword, setInvalidPassword] = useState(false);
+    const[usernameExists, setUsernameExists] = useState(false);
+    const[emailExists, setEmailExists] = useState(false);
     const[errorOccurred, setErrorOccurred] = useState(false);
 
     const handleShowPassword = () => setShowPassword((showPassword) => !showPassword);
@@ -61,6 +67,8 @@ function Register() {
 
     async function handleRegister(e: any) {
         setProcessing(true);
+        setEmailExists(false);
+        setUsernameExists(false);
 
         if(username.length === 0) {
             setUsernameError(true);
@@ -105,6 +113,18 @@ function Register() {
             return;
         }
 
+        let info: RegisterInfo = {
+            user: username,
+            password: password,
+            email: email.toLowerCase()
+        }
+
+        console.log(info);
+
+        await axios.post<AccountData>("http://localhost:8080/register", info).then((response) => {
+            console.log(response.data);
+        }).catch();
+
         setProcessing(false);
     }
 
@@ -118,16 +138,18 @@ function Register() {
                 <CardContent className="item field">
                     <TextField required label="Username" fullWidth type="text"
                                onChange={e => setUsername(e.target.value)}
-                               error = {usernameError}
-                               helperText = {usernameError ? "Field required" : ""}
+                               error = {usernameError || usernameExists}
+                               helperText = {usernameError ? "Field required" :
+                                   (usernameExists ? "Username already taken" : "")}
                     ></TextField>
                 </CardContent>
                 <CardContent className="item field">
                     <TextField required label="Email Address" fullWidth type="email"
                                onChange={e => setEmail(e.target.value)}
-                               error = {emailError || invalidEmail}
+                               error = {emailError || invalidEmail || emailExists}
                                helperText = {emailError ? "Field required" :
-                                   (invalidEmail ? "Please use valid email address" : "")}
+                                   (invalidEmail ? "Please use valid email address" :
+                                       (emailExists ? "Email already taken" : ""))}
                     ></TextField>
                 </CardContent>
                 <CardContent className="item field">

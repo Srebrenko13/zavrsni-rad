@@ -7,6 +7,7 @@ import Home from './Home';
 import Game from './Game'
 import Login from "./Login";
 import Register from "./Register";
+import Profile from "./Profile";
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
                     <Route path="game" element={<Game/>}/>
                     <Route path="login" element={<Login/>}/>
                     <Route path="register" element={<Register/>}/>
+                    <Route path="profile" element={<Profile/>}/>
                 </Route>
               </Routes>
             </BrowserRouter>

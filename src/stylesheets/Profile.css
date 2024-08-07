@@ -1,0 +1,18 @@
+.info{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.games{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.game_card{
+    display: flex;
+    flex: 1 0 45%;
+    justify-content: center;
+    margin: auto;
+}

@@ -1,5 +1,5 @@
 export interface RegisterInfo {
     user: string,
-    passwordHash: string,
+    password: string,
     email: string
 }
