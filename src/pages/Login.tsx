@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {
+    Alert,
     Box,
     Button,
     Card,
@@ -13,11 +14,13 @@ import {
 import '../stylesheets/LoginAndRegister.css';
 import {LockPerson, Visibility, VisibilityOff} from "@mui/icons-material";
 import axios from "axios";
-import {AccountData} from "../models/AccountData";
 import {LoginInfo} from "../models/LoginInfo";
+import {useNavigate} from "react-router-dom";
+import {getCookie, setCookie} from "typescript-cookie";
 
 function Login() {
 
+    const navigate = useNavigate();
     const[processing, setProcessing] = useState(false);
     const[username, setUsername] = useState("");
     const[password, setPassword] = useState("");
@@ -25,20 +28,26 @@ function Login() {
     const[usernameError, setUsernameError] = useState(false);
     const[passwordError, setPasswordError] = useState(false);
     const[errorOccurred, setErrorOccurred] = useState(false);
+    const[loginFailed, setLoginFailed] = useState(false);
+    const[otherError, setOtherError] = useState(false);
+    const[alreadyLogged, setAlreadyLogged] = useState(false);
 
     const handleShowPassword = () => setShowPassword((showPassword) => !showPassword);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
     };
 
-    async function sleepy(){
-        return new Promise(
-            (resolve) => setTimeout(resolve, 10000)
-        );
-    }
-
     async function handleLogin(e: any){
         setProcessing(true);
+        setLoginFailed(false);
+        setOtherError(false);
+
+        if(getCookie('sessionId') !== undefined) {
+            console.log(getCookie('sessionId'));
+            setAlreadyLogged(true);
+            setProcessing(false);
+            return;
+        }
 
         if(username.length === 0) {
             setUsernameError(true);
@@ -63,16 +72,17 @@ function Login() {
             password: password
         }
 
-        console.log(info);
+        await axios.post<string>("http://localhost:8080/login", info).then((response) => {
+            setCookie('sessionId', response.data, {expires: 2, sameSite: "none"});
+            navigate('/profile');
+        }).catch((err) => {
+            setLoginFailed(true);
+            const resp = err.response.data;
+            console.log("Error occurred: " + resp);
+            if(err.response.status === 500) setOtherError(true);
+        });
 
-        // await sleepy();
-
-        // probaj postat na backend i spremit u cookie ono sta si primio nazad, isto probaj stavis https umjesto http
-/*        await axios.post<AccountData>("http://localhost:8080/login", info).then((response) => {
-            console.log(response.data);
-        }).catch(); */
         setProcessing(false);
-        // redirectaj na user profile ako je prijava uspjesna
     }
 
     return(
@@ -109,12 +119,22 @@ function Login() {
                     <Link href="/register">Need an account?</Link>
                 </CardContent>
                 <CardContent className="item">
-                    <Button variant="contained" onClick={handleLogin} disabled={processing}>Login</Button>
+                    <Button variant="contained" onClick={handleLogin} disabled={processing || alreadyLogged}>
+                        {alreadyLogged ? "Already logged in" : "Login"}
+                    </Button>
                 </CardContent>
                 {processing && (
                     <CardContent className="loading_overlay item">
                         <LinearProgress/>
                     </CardContent>
+                )}
+                {loginFailed && (
+                        <CardContent className="item">
+                            <Alert severity="error">{
+                                otherError? "Unexpected error occurred" :
+                                    "Incorrect username or password"
+                            }</Alert>
+                        </CardContent>
                 )}
             </Card>
         </Box>

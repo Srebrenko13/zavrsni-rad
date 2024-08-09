@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import {
+    Alert,
     Box,
     Button,
     Card,
@@ -15,8 +16,8 @@ import {PersonAdd, Visibility, VisibilityOff} from "@mui/icons-material";
 import {useNavigate} from "react-router-dom";
 import {RegisterInfo} from "../models/RegisterInfo";
 import axios from "axios";
-import {AccountData} from "../models/AccountData";
-import {hashSync} from "bcrypt-ts";
+import {DatabaseStatus} from "../models/DatabaseStatus";
+import {getCookie, setCookie} from "typescript-cookie";
 
 function Register() {
 
@@ -39,7 +40,11 @@ function Register() {
     const[invalidPassword, setInvalidPassword] = useState(false);
     const[usernameExists, setUsernameExists] = useState(false);
     const[emailExists, setEmailExists] = useState(false);
+    const[otherError, setOtherError] = useState(false);
+    const[registerFailed, setRegisterFailed] = useState(false);
     const[errorOccurred, setErrorOccurred] = useState(false);
+    const[alreadyLogged, setAlreadyLogged] = useState(false);
+
 
     const handleShowPassword = () => setShowPassword((showPassword) => !showPassword);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -59,16 +64,19 @@ function Register() {
         return passwordRegex.test(password);
     }
 
-    async function sleepy(){
-        return new Promise(
-            (resolve) => setTimeout(resolve, 10000)
-        );
-    }
-
     async function handleRegister(e: any) {
         setProcessing(true);
         setEmailExists(false);
         setUsernameExists(false);
+        setOtherError(false);
+        setRegisterFailed(false);
+
+        if(getCookie('sessionId') !== undefined) {
+            console.log(getCookie('sessionId'));
+            setAlreadyLogged(true);
+            setProcessing(false);
+            return;
+        }
 
         if(username.length === 0) {
             setUsernameError(true);
@@ -105,8 +113,6 @@ function Register() {
             setErrorOccurred(true);
         } else setInvalidPassword(false);
 
-        // await sleepy();
-
         if(errorOccurred){
             setProcessing(false);
             setErrorOccurred(false);
@@ -119,11 +125,19 @@ function Register() {
             email: email.toLowerCase()
         }
 
-        console.log(info);
-
-        await axios.post<AccountData>("http://localhost:8080/register", info).then((response) => {
-            console.log(response.data);
-        }).catch();
+        await axios.post<string>("http://localhost:8080/register", info).then((response) => {
+            setCookie('sessionId', response.data, {expires: 2, sameSite: "none"});
+            navigate('/profile');
+        }).catch((err) => {
+            const resp = err.response.data;
+            setRegisterFailed(true);
+            console.log("Error occurred");
+            const status = resp as DatabaseStatus;
+            console.log(status);
+            if(status.emailExists) setEmailExists(true);
+            else if(status.usernameExists) setUsernameExists(true);
+            else setOtherError(true);
+        });
 
         setProcessing(false);
     }
@@ -139,8 +153,7 @@ function Register() {
                     <TextField required label="Username" fullWidth type="text"
                                onChange={e => setUsername(e.target.value)}
                                error = {usernameError || usernameExists}
-                               helperText = {usernameError ? "Field required" :
-                                   (usernameExists ? "Username already taken" : "")}
+                               helperText = {usernameError ? "Field required" : ""}
                     ></TextField>
                 </CardContent>
                 <CardContent className="item field">
@@ -148,8 +161,7 @@ function Register() {
                                onChange={e => setEmail(e.target.value)}
                                error = {emailError || invalidEmail || emailExists}
                                helperText = {emailError ? "Field required" :
-                                   (invalidEmail ? "Please use valid email address" :
-                                       (emailExists ? "Email already taken" : ""))}
+                                   (invalidEmail ? "Please use valid email address" : "")}
                     ></TextField>
                 </CardContent>
                 <CardContent className="item field">
@@ -193,13 +205,26 @@ function Register() {
                     <Link href="/login">Already have an account?</Link>
                 </CardContent>
                 <CardContent className="item">
-                    <Button variant="contained" onClick={handleRegister} disabled={processing}>Register</Button>
+                    <Button variant="contained" onClick={handleRegister} disabled={processing || alreadyLogged}>
+                        {alreadyLogged ? "Already logged in" : "Register"}
+                    </Button>
                 </CardContent>
                 {processing && (
                     <CardContent className="loading_overlay item">
                         <LinearProgress/>
                     </CardContent>
                 )}
+                {registerFailed && (
+                    <CardContent className="item">
+                        <Alert severity="error">{
+                            emailExists? "Email already taken" :
+                                (usernameExists? "Username already taken" :
+                                "Unexpected error occurred")
+                        }</Alert>
+                    </CardContent>
+                )
+
+                }
             </Card>
         </Box>
     )
