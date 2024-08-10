@@ -1,19 +1,141 @@
-.info{
+.profile_box{
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     justify-content: center;
+    width: 70vw;
     margin: 20px auto;
+}
+
+@media screen and (min-width: 900px){
+    .info{
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .account_info{
+        margin-right: 2%;
+        width: 40%;
+    }
+
+    .about_me{
+        width: 55%;
+    }
+
+    .game_header, .game_card{
+        width: 120%;
+    }
+}
+
+@media screen and (max-width: 900px){
+    .info{
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .account_info{
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .about_me{
+        width: 100%;
+    }
+
+    .game_header, .game_card{
+        width: 70vw;
+    }
+}
+
+
+.sign{
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 16px 16px 0 16px;
+}
+
+.info_box{
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    font-size: 18px;
+    margin: 0 16px 16px 16px;
+}
+
+.info_element{
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    margin: 0;
+}
+
+.info_type{
+    font-weight: bold;
+}
+
+.about_me{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.about_text{
+    font-size: 18px;
+    text-align: center;
+    text-wrap: wrap;
+}
+
+.about_buttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
 }
 
 .games{
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-content: center;
+    width: 70vw;
 }
 
-.game_card{
+.game_header, .game_card{
     display: flex;
-    flex: 1 0 45%;
-    justify-content: center;
-    margin: auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-self: center;
+    width: 97%;
+    margin-bottom: 10px;
+}
+
+.game_id{
+    width: 6%;
+}
+
+.game_title{
+    width: 30%;
+}
+
+.game_description{
+    width: 40%;
+}
+
+.game_replay, .game_view{
+    width: 10%;
+}
+
+.game_id, .game_title, .game_description, .game_view, .game_replay{
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: space-around;
+    text-wrap: wrap;
 }
