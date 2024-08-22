@@ -1,11 +1,10 @@
 .header{
-    position: static;
-    width: 100%;
-    text-align: center;
-    align-items: center;
-    background-color: deepskyblue;
-    padding-top: 5px;
-    padding-bottom: 5px;
     margin-bottom: auto;
-    color: white;
+}
+
+.buttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 200px;
 }

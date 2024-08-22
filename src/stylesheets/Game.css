@@ -25,6 +25,10 @@
     flex-wrap: nowrap;
 }
 
+.option-text{
+    margin-left: 10px;
+}
+
 .button{
     width: 7%;
     margin: 10px;
@@ -48,6 +52,7 @@
 .image{
     display: flex;
     justify-content: center;
+    padding-bottom: 2%;
 }
 
 .loading_screen{
@@ -74,4 +79,9 @@
 .loading_overlay{
     width: 50%;
     padding: 20px;
+}
+
+.thank_you_text{
+    display: flex;
+    justify-content: center;
 }

@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react';
-import axios, {AxiosResponse} from "axios";
+import axios from "axios";
 import {StoryModel} from "../models/StoryModel";
 import OpenAI from "openai";
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import {useNavigate} from "react-router-dom";
-import {Box, Card, LinearProgress} from "@mui/material";
+import {Box, Button, Card, LinearProgress} from "@mui/material";
 import '../stylesheets/Game.css'
 
 function App() {
@@ -50,7 +50,7 @@ function App() {
 
     async function generateNewChapter(e: any){
         setLoading(true);
-        await axios.post<StoryModel>('http://localhost:8080/game/choice/' + e.target.textContent, {history: history}).then((response) => {
+        await axios.post<StoryModel>('http://localhost:8080/game/choice/' + e.target.textContent, {history: history, chapter: chapter}).then((response) => {
             localStorage.setItem('game_data', JSON.stringify(response.data));
             setFields();
         }).catch().finally(() => {
@@ -67,27 +67,33 @@ function App() {
       <Card className="body">
           <h1 className="title">Chapter {chapter}: {description}</h1>
           <p className="text-center">{story}</p>
-          <div className="image"><img src={picture} alt="Nema slike, sirotinja smo!" /></div>
+          <div className="image"><img src={picture} alt="Loading image failed. :(" /></div>
           {!game_finished && (
               <div className="center option-field" hidden={game_finished}>
                   <div className="center option">
-                      <button onClick={generateNewChapter} className="center button" disabled={loading}>1</button>
-                      <p>{option_1}</p>
+                      <Button onClick={generateNewChapter} className="center button" disabled={loading}
+                        variant="contained"
+                      >1</Button>
+                      <p className="option-text">{option_1}</p>
                   </div>
                   <div className="center option">
-                      <button onClick={generateNewChapter} className="center button" disabled={loading}>2</button>
-                      <p>{option_2}</p>
+                      <Button onClick={generateNewChapter} className="center button" disabled={loading}
+                              variant="contained"
+                      >2</Button>
+                      <p className="option-text">{option_2}</p>
                   </div>
                   <div className="center option">
-                      <button onClick={generateNewChapter} className="center button" disabled={loading}>3</button>
-                      <p>{option_3}</p>
+                      <Button onClick={generateNewChapter} className="center button" disabled={loading}
+                              variant="contained"
+                      >3</Button>
+                      <p className="option-text">{option_3}</p>
                   </div>
               </div>
           )}
           {game_finished && (
               <div className="center option-field">
-                  <p className="title">Thank you for playing the game!</p>
-                  <button className="center end_button" onClick={goHome}>End game</button>
+                  <p className="title thank_you_text">Thank you for playing the game!</p>
+                  <Button className="center end_button" onClick={goHome} variant="contained">End game</Button>
               </div>
           )}
           {loading && (

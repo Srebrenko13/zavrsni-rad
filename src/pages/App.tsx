@@ -10,26 +10,25 @@ import Register from "./Register";
 import Profile from "./Profile";
 
 function App() {
-
-
-  return (
-      <div className="app">
-            <Header/>
+    return (
+        <div className="app">
             <BrowserRouter>
-              <Routes>
-                <Route path="/">
-                    <Route index element={<Home/>}/>
-                    <Route path="home" element={<Home/>}/>
-                    <Route path="game" element={<Game/>}/>
-                    <Route path="login" element={<Login/>}/>
-                    <Route path="register" element={<Register/>}/>
-                    <Route path="profile" element={<Profile/>}/>
-                </Route>
-              </Routes>
+                <Header/>
+                <Routes>
+                    <Route path="/">
+                        <Route index element={<Home/>}/>
+                        <Route path="home" element={<Home/>}/>
+                        <Route path="game" element={<Game/>}/>
+                        <Route path="login" element={<Login/>}/>
+                        <Route path="register" element={<Register/>}/>
+                        <Route path="profile" element={<Profile/>}/>
+                    </Route>
+                </Routes>
+                <Footer/>
             </BrowserRouter>
-            <Footer/>
-      </div>
-  );
+
+        </div>
+    );
 }
 
 export default App;
