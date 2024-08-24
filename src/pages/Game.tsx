@@ -11,6 +11,8 @@ function App() {
     const navigate = useNavigate();
     const temp: ChatCompletionMessageParam[] = [];
     const[chapter, setChapter] = useState(-1);
+    const[chapters, setChapters] = useState(-1);
+    const[gameEnding, setGameEnding] = useState(false);
     const[description, setDescription] = useState("No response yet :(");
     const[story, setStory] = useState("One blank story...");
     const[picture, setPicture] = useState("");
@@ -36,21 +38,27 @@ function App() {
         setOption3(game.option_3);
         setGameFinished(game.game_finished);
         setHistory(game.history);
-        console.log(game);
     }
 
     useEffect(() => {
         const storage = localStorage.getItem('game_data');
-        let game: any;
-        if(storage){
-            game = JSON.parse(storage);
-            setFields();
-        }
+        if(storage) setFields();
+
+        if(chapter === (chapters - 1)) setGameEnding(true);
     }, [chapter]);
+
+    useEffect(() => {
+        const gameChapters = localStorage.getItem("numberOfChapters");
+        if(gameChapters){
+            const numberOfChapters = parseInt(gameChapters);
+            setChapters(numberOfChapters);
+        }
+    }, []);
 
     async function generateNewChapter(e: any){
         setLoading(true);
-        await axios.post<StoryModel>('http://localhost:8080/game/choice/' + e.target.textContent, {history: history, chapter: chapter}).then((response) => {
+        await axios.post<StoryModel>('http://localhost:8080/game/choice/' + e.target.textContent,
+            {history: history, gameEnding: gameEnding}).then((response) => {
             localStorage.setItem('game_data', JSON.stringify(response.data));
             setFields();
         }).catch().finally(() => {
@@ -59,6 +67,7 @@ function App() {
     }
 
     function goHome(){
+        localStorage.removeItem("numberOfChapters");
         navigate('/');
     }
 

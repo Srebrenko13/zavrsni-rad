@@ -21,8 +21,8 @@ function Home(){
     }
 
     function decreaseChapters(){
-        if(chapters > 1) setChapters(chapters - 1);
-        if(chapters === 2) setDecreaseDisabled(true);
+        if(chapters > 2) setChapters(chapters - 1);
+        if(chapters === 3) setDecreaseDisabled(true);
         if(increaseDisabled) setIncreaseDisabled(false);
     }
 
@@ -35,6 +35,7 @@ function Home(){
     async function navigateToGame(e: any) {
         setLoading(true);
         setStartDisabled(true);
+        localStorage.setItem("numberOfChapters", chapters.toString());
         console.log("Calling post with topic: ", topic);
         await axios.post<StoryModel>('http://localhost:8080/game/start', {topic: topic, chapters: chapters})
             .then((response) => {

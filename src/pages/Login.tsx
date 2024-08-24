@@ -73,7 +73,7 @@ function Login() {
         }
 
         await axios.post<string>("http://localhost:8080/login", info).then((response) => {
-            setCookie('sessionId', response.data, {expires: 2, sameSite: "none"});
+            setCookie('sessionId', response.data, {expires: 2, sameSite: "lax"});
             navigate('/profile');
         }).catch((err) => {
             setLoginFailed(true);

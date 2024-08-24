@@ -126,7 +126,7 @@ function Register() {
         }
 
         await axios.post<string>("http://localhost:8080/register", info).then((response) => {
-            setCookie('sessionId', response.data, {expires: 2, sameSite: "none"});
+            setCookie('sessionId', response.data, {expires: 2, sameSite: "lax"});
             navigate('/profile');
         }).catch((err) => {
             const resp = err.response.data;
