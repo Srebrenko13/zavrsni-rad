@@ -6,6 +6,7 @@ import {AccountData} from "../models/AccountData";
 import {getCookie} from "typescript-cookie";
 import {emptyUser} from "../typescripts/Utils"
 import {AccountCircle, Cancel, Edit, EmojiPeople, Save} from "@mui/icons-material";
+import GameInfo from "../components/GameInfo";
 
 function Profile(){
     const[userInfo , setUserInfo] = useState(emptyUser);
@@ -129,24 +130,12 @@ function Profile(){
             <Box className="games">
                 <Card className="game_header">
                     <CardContent className="game_id">Game ID</CardContent>
-                    <CardContent className="game_title">Title</CardContent>
-                    <CardContent className="game_description">Description</CardContent>
-                    <CardContent className="game_view">View</CardContent>
-                    <CardContent className="game_replay">Replay</CardContent>
+                    <CardContent className="game_topic">Topic</CardContent>
+                    <CardContent className="game_description">Number of chapters</CardContent>
+                    <CardContent className="game_view"></CardContent>
                     <span/>
                 </Card>
-                <Card className="game_card">
-                    <CardContent className="game_id">372</CardContent>
-                    <CardContent className="game_title">Crazy pirate adventure</CardContent>
-                    <CardContent className="game_description">Delve into crazy search for One Piece as a member of Straw Hat crew lead by Monkey D. Luffy</CardContent>
-                    <CardContent className="game_view">
-                        <Button variant="outlined" color="primary">View</Button>
-                    </CardContent>
-                    <CardContent className="game_replay">
-                        <Button variant="outlined" color="primary">Replay</Button>
-                    </CardContent>
-                    <span/>
-                </Card>
+                <GameInfo gameId={123} topic={"Test test"} numOfChapters={4}/>
             </Box>
         </Box>
     )

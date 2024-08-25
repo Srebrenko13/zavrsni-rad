@@ -36,12 +36,22 @@ function Home(){
         setLoading(true);
         setStartDisabled(true);
         localStorage.setItem("numberOfChapters", chapters.toString());
+        localStorage.setItem("topic", topic);
+        localStorage.setItem("chosenOptions", JSON.stringify([]));
+        const temp = 1;
+        localStorage.setItem("chapterNumber", temp.toString());
         console.log("Calling post with topic: ", topic);
-        await axios.post<StoryModel>('http://localhost:8080/game/start', {topic: topic, chapters: chapters})
+        await axios.post<StoryModel>('http://localhost:8080/game/start', {topic: topic, chapters: chapters} ,
+            {headers:{
+                    Authorization: "Bearer " + getCookie('sessionId')
+                }})
             .then((response) => {
                 localStorage.setItem('game_data', JSON.stringify(response.data));
-                console.log(response.data);
-        }).catch();
+                response.data.history = undefined;
+                localStorage.setItem('chapters' ,JSON.stringify([response.data]));
+        }).catch((err) => {
+            console.log(err);
+            });
         setStartDisabled(false);
         setLoading(false);
         navigate("/game");
@@ -49,7 +59,7 @@ function Home(){
 
     useEffect(() => {
         setStartDisabled(loading || (getCookie('sessionId') === undefined));
-    })
+    });
 
     return(
         <Box className="play_box">
@@ -57,7 +67,7 @@ function Home(){
             <Card className="play_card">
                 <CardContent className="topic_box">
                     <TextField id="outlined-basic" placeholder="Please input chosen topic of your game!"
-                           onChange={handleTopicChange} className="topic_field" multiline={true}/>
+                           onChange={handleTopicChange} className="topic_field"/>
                 </CardContent>
                 <CardActions>
                     <CardActions>

@@ -114,28 +114,29 @@
     align-self: center;
     width: 97%;
     margin-bottom: 10px;
+    justify-content: space-between;
 }
 
 .game_id{
-    width: 6%;
+    width: 20%;
 }
 
-.game_title{
-    width: 30%;
+.game_topic{
+    width: 45%;
 }
 
 .game_description{
-    width: 40%;
+    width: 15%;
 }
 
-.game_replay, .game_view{
-    width: 10%;
+.game_view{
+    width: 20%;
 }
 
-.game_id, .game_title, .game_description, .game_view, .game_replay{
+.game_id, .game_topic, .game_description, .game_view{
     display: flex;
     text-align: center;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
     text-wrap: wrap;
 }

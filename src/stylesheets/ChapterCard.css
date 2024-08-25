@@ -1,0 +1,60 @@
+.body{
+    margin: 20px 20%;
+    padding: 20px 50px;
+}
+
+.title{
+    text-align: center;
+}
+
+.text-center{
+    text-align: justify;
+}
+
+.option{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.option-text{
+    margin-left: 10px;
+}
+
+.chosen_option{
+    font-weight: bold;
+}
+
+.game_buttons{
+    margin: 10px;
+    padding: 10px;
+    align-content: center;
+    align-self: center;
+    font-size: 14px;
+}
+
+.end_buttons, .navigation_buttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.end_button, .navigation_button{
+    margin: 10px;
+}
+
+.image{
+    display: flex;
+    justify-content: center;
+    padding-bottom: 2%;
+}
+
+.loading_overlay{
+    width: 50%;
+    padding: 20px;
+}
+
+.thank_you_text{
+    display: flex;
+    justify-content: center;
+}
