@@ -5,6 +5,5 @@ export const emptyUser: AccountData = {
     username: "Loading",
     email: "",
     dateCreated: new Date("1.1.1970."),
-    role: "",
     loginStatus: false
 }
