@@ -17,6 +17,7 @@ import axios from "axios";
 import {LoginInfo} from "../models/LoginInfo";
 import {useNavigate} from "react-router-dom";
 import {getCookie, setCookie} from "typescript-cookie";
+import {basePath} from "../typescripts/Utils";
 
 function Login() {
 
@@ -27,7 +28,6 @@ function Login() {
     const[showPassword, setShowPassword] = useState(false);
     const[usernameError, setUsernameError] = useState(false);
     const[passwordError, setPasswordError] = useState(false);
-    const[errorOccurred, setErrorOccurred] = useState(false);
     const[loginFailed, setLoginFailed] = useState(false);
     const[otherError, setOtherError] = useState(false);
     const[alreadyLogged, setAlreadyLogged] = useState(false);
@@ -41,6 +41,7 @@ function Login() {
         setProcessing(true);
         setLoginFailed(false);
         setOtherError(false);
+        let errorOccurred = false;
 
         if(getCookie('sessionId') !== undefined) {
             console.log(getCookie('sessionId'));
@@ -51,18 +52,17 @@ function Login() {
 
         if(username.length === 0) {
             setUsernameError(true);
-            setErrorOccurred(true);
+            errorOccurred = true;
         }
         else setUsernameError(false);
 
         if(password.length === 0) {
             setPasswordError(true);
-            setErrorOccurred(true);
+            errorOccurred = true;
         }
         else setPasswordError(false);
 
         if(errorOccurred){
-            setErrorOccurred(false);
             setProcessing(false);
             return;
         }
@@ -72,7 +72,7 @@ function Login() {
             password: password
         }
 
-        await axios.post<string>("http://localhost:8080/login", info).then((response) => {
+        await axios.post<string>(basePath + "/login", info).then((response) => {
             setCookie('sessionId', response.data, {expires: 2, sameSite: "lax"});
             navigate('/profile');
         }).catch((err) => {
@@ -94,26 +94,26 @@ function Login() {
                 </div>
                 <CardContent className="item field">
                     <TextField id="username" required label="Username" fullWidth type="text"
-                        onChange={e => setUsername(e.target.value)}
-                        error = {usernameError}
-                        helperText = {usernameError ? "Field required" : ""}></TextField>
+                               onChange={e => setUsername(e.target.value)}
+                               error = {usernameError}
+                               helperText = {usernameError ? "Field required" : ""}></TextField>
                 </CardContent>
                 <CardContent className="item field">
                     <TextField id="password" required label="Password" fullWidth type={showPassword ? 'text' : 'password'}
-                         onChange={e => setPassword(e.target.value)}
-                         error = {passwordError}
-                         helperText= {passwordError ? "Field required" : ""}
-                         InputProps={{
-                             endAdornment: <InputAdornment position="end" sx={{padding: 0, margin: 0}}>
-                                 <IconButton
-                                    onClick={handleShowPassword}
-                                    onMouseDown={handleMouseDownPassword}
-                                    edge="end"
-                                 >
-                                     {showPassword ? <VisibilityOff/> : <Visibility/>}
-                                 </IconButton>
-                             </InputAdornment>
-                         }}></TextField>
+                               onChange={e => setPassword(e.target.value)}
+                               error = {passwordError}
+                               helperText= {passwordError ? "Field required" : ""}
+                               InputProps={{
+                                   endAdornment: <InputAdornment position="end" sx={{padding: 0, margin: 0}}>
+                                       <IconButton
+                                           onClick={handleShowPassword}
+                                           onMouseDown={handleMouseDownPassword}
+                                           edge="end"
+                                       >
+                                           {showPassword ? <VisibilityOff/> : <Visibility/>}
+                                       </IconButton>
+                                   </InputAdornment>
+                               }}></TextField>
                 </CardContent>
                 <CardContent>
                     <Link href="/register">Need an account?</Link>
@@ -129,12 +129,12 @@ function Login() {
                     </CardContent>
                 )}
                 {loginFailed && (
-                        <CardContent className="item">
-                            <Alert severity="error">{
-                                otherError? "Unexpected error occurred" :
-                                    "Incorrect username or password"
-                            }</Alert>
-                        </CardContent>
+                    <CardContent className="item">
+                        <Alert severity="error">{
+                            otherError? "Unexpected error occurred" :
+                                "Incorrect username or password"
+                        }</Alert>
+                    </CardContent>
                 )}
             </Card>
         </Box>

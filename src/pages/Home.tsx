@@ -6,6 +6,7 @@ import {Box, Button, Card, CardActions, CardContent, IconButton, LinearProgress,
 import '../stylesheets/Home.css'
 import {getCookie} from "typescript-cookie";
 import {AddBox, IndeterminateCheckBox} from "@mui/icons-material";
+import {basePath} from "../typescripts/Utils";
 
 function Home(){
     const navigate = useNavigate();
@@ -36,12 +37,10 @@ function Home(){
         setLoading(true);
         setStartDisabled(true);
         localStorage.setItem("numberOfChapters", chapters.toString());
-        localStorage.setItem("topic", topic);
-        localStorage.setItem("chosenOptions", JSON.stringify([]));
+        localStorage.setItem("topic", JSON.stringify(topic));
         const temp = 1;
         localStorage.setItem("chapterNumber", temp.toString());
-        console.log("Calling post with topic: ", topic);
-        await axios.post<StoryModel>('http://localhost:8080/game/start', {topic: topic, chapters: chapters} ,
+        await axios.post<StoryModel>(basePath + '/game/start', {topic: topic, chapters: chapters} ,
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
                 }})
@@ -50,7 +49,7 @@ function Home(){
                 response.data.history = undefined;
                 localStorage.setItem('chapters' ,JSON.stringify([response.data]));
         }).catch((err) => {
-            console.log(err);
+                console.log(err);
             });
         setStartDisabled(false);
         setLoading(false);

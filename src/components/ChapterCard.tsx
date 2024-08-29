@@ -8,6 +8,7 @@ import OpenAI from "openai";
 import '../stylesheets/ChapterCard.css'
 import ChatCompletionMessageParam = OpenAI.ChatCompletionMessageParam;
 import {ArrowCircleLeft, ArrowCircleRight} from "@mui/icons-material";
+import {basePath} from "../typescripts/Utils";
 
 interface CardProps {
     viewMode: boolean
@@ -18,7 +19,6 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
     const temp: ChatCompletionMessageParam[] = [];
     const[chapter, setChapter] = useState(-1);
     const[chapters, setChapters] = useState(-1);
-    const[viewingChapter, setViewingChapter] = useState(1);
     const[gameEnding, setGameEnding] = useState(false);
     const[description, setDescription] = useState("No response yet :(");
     const[story, setStory] = useState("One blank story...");
@@ -31,16 +31,18 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
     const[loading, setLoading] = useState(false);
     const[saving, setSaving] = useState(false);
     const[alreadySaved, setAlreadySaved] = useState(false);
+    const[chosenOption, setChosenOption] = useState(-1);
+    const[gameId, setGameId] = useState(-1);
 
     function setFields(){
         const storage = localStorage.getItem('game_data');
         const chapterStorage = localStorage.getItem('chapterNumber');
         let game: any, chapterNumber: any;
-        if(storage && chapterStorage){
-            game = JSON.parse(storage);
-            chapterNumber = JSON.parse(chapterStorage);
-        }
-        setChapter(parseInt(chapterNumber));
+        if(storage) game = JSON.parse(storage);
+        if(chapterStorage && !viewMode) chapterNumber = JSON.parse(chapterStorage);
+
+        if(!viewMode) setChapter(parseInt(chapterNumber));
+        else setChapter(game.chapter);
         setDescription(game.description);
         setStory(game.story);
         setPicture(game.picture);
@@ -48,19 +50,117 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
         setOption2(game.option_2);
         setOption3(game.option_3);
         setGameFinished(game.game_finished);
-        setHistory(game.history);
+        if(!viewMode) setHistory(game.history);
+        if(viewMode && !game_finished) setChosenOption(game.chosen_option);
+    }
+
+    function loadGameId(){
+        const storage = localStorage.getItem("game_id");
+        if(storage) setGameId(JSON.parse(storage));
+    }
+
+    function goHome(){
+        localStorage.clear();
+        navigate('/');
+    }
+
+    function goProfile(){
+        localStorage.clear();
+        navigate('/profile');
+    }
+
+    async function previousChapter(){
+        setLoading(true);
+
+        await axios.post<StoryModel>(basePath + "/game/chapter", {game_id: gameId, chapter: chapter - 1},
+            {headers:{
+                    Authorization: "Bearer " + getCookie('sessionId')
+                }}).then((response) => {
+            localStorage.setItem("game_data", JSON.stringify(response.data));
+            setFields();
+        }).catch((err) => {
+            console.log("Failed to load chapter.", err);
+        });
+
+        setLoading(false);
+    }
+
+    async function nextChapter(){
+        setLoading(true);
+
+        await axios.post<StoryModel>(basePath + "/game/chapter", {game_id: gameId, chapter: chapter + 1},
+            {headers:{
+                    Authorization: "Bearer " + getCookie('sessionId')
+                }}).then((response) => {
+            localStorage.setItem("game_data", JSON.stringify(response.data));
+            setFields();
+        }).catch((err) => {
+            console.log("Failed to load chapter.", err);
+        });
+
+        setLoading(false);
+    }
+
+    async function replayGame(){
+        setLoading(true);
+        let oldChapters: StoryModel[] = [];
+        for(let i = 1; i < chapter; i++){
+            await axios.post<StoryModel>(basePath + "/game/chapter", {game_id: gameId, chapter: i},
+                {headers:{
+                    Authorization: "Bearer " + getCookie('sessionId')
+                }}).then((response) => {
+                oldChapters.push(response.data);
+            }).catch((err) => {
+                console.log("Failed to load chapter.", err);
+            });
+        }
+        localStorage.setItem("chapters", JSON.stringify(oldChapters));
+        localStorage.setItem("chapterNumber", JSON.stringify(chapter));
+        saveChapterToLocalStorage();
+
+        await axios.post<ChatCompletionMessageParam[]>(basePath + "/game/replay",
+            {previousChapters: oldChapters, numberOfChapters: chapters},
+            {headers:{
+                    Authorization: "Bearer " + getCookie('sessionId')
+                }}).then((response) => {
+                        console.log(response.data);
+                        saveHistory(response.data);
+            }).catch((err) => {
+                console.log("Error getting message history. ", err);
+        });
+        setLoading(false);
+        navigate('/game');
+    }
+
+    function saveHistory(history: ChatCompletionMessageParam[]){
+        const chapterStorage = localStorage.getItem("game_data");
+        if(chapterStorage){
+            let current = JSON.parse(chapterStorage);
+            current.history = history;
+            localStorage.setItem("game_data", JSON.stringify(current));
+        }
     }
 
     function saveChapterToLocalStorage(){
         const storage = localStorage.getItem("chapters");
         const chapterStorage = localStorage.getItem("game_data");
         if(storage && chapterStorage){
-            let chapters: [Object] = JSON.parse(storage);
+            let chapters: [StoryModel] = JSON.parse(storage);
             let generated: StoryModel = JSON.parse(chapterStorage);
             generated.history = undefined;
-            console.log(chapters);
-            console.log(generated);
             chapters.push(generated);
+            localStorage.setItem("chapters", JSON.stringify(chapters));
+        }
+    }
+
+    function saveChosenOption(option: number){
+        const storage = localStorage.getItem("chapters");
+        if(storage){
+            let chapters: [StoryModel] = JSON.parse(storage);
+            let lastChapter: StoryModel = chapters[chapters.length - 1];
+            chapters.pop();
+            lastChapter.chosen_option = option;
+            chapters.push(lastChapter);
             localStorage.setItem("chapters", JSON.stringify(chapters));
         }
     }
@@ -81,17 +181,17 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
         const optionsData = localStorage.getItem("chosenOptions");
         if(optionsData){
             let options: [number] = JSON.parse(optionsData);
-            console.log("Options: ", option, ", previous options: ", options);
             options.push(option);
             localStorage.setItem("chosenOptions", JSON.stringify(options));
         } else console.log("Failed to load options");
 
-        await axios.post<StoryModel>('http://localhost:8080/game/choice/' + e.target.textContent,
+        await axios.post<StoryModel>(basePath + '/game/choice/' + e.target.textContent,
             {history: history, gameEnding: gameEnding} ,
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
                 }})
             .then((response) => {
+                saveChosenOption(option);
                 updateChapterNumber();
                 response.data.chapter = chapter + 1;
                 localStorage.setItem('game_data', JSON.stringify(response.data));
@@ -104,19 +204,13 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
             });
     }
 
-    function goHome(){
-        localStorage.clear();
-        navigate('/');
-    }
-
     async function saveGame(e: any){
         setSaving(true);
         const topicData = localStorage.getItem("topic");
         const numberOfChaptersData = localStorage.getItem("numberOfChapters");
         const chaptersData = localStorage.getItem("chapters");
-        const optionsData = localStorage.getItem("chosenOptions");
 
-        let chaptersValue, topicValue, numbersValue, chosenOptions;
+        let chaptersValue, topicValue, numbersValue;
 
         if(chaptersData) chaptersValue = JSON.parse(chaptersData);
         else console.log("Chapters error!");
@@ -127,11 +221,8 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
         if(numberOfChaptersData) numbersValue = JSON.parse(numberOfChaptersData);
         else console.log("Numbers error!");
 
-        if(optionsData) chosenOptions = JSON.parse(optionsData);
-        else console.log("Options error!");
-
         axios.post("http://localhost:8080/game/save",
-            {topic: topicValue, numberOfChapters: numbersValue, chapters: chaptersValue, chosenOptions: chosenOptions},
+            {topic: topicValue, chapters: chaptersValue},
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
                 }}).then((response => {
@@ -157,6 +248,8 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
             const numberOfChapters = parseInt(gameChapters);
             setChapters(numberOfChapters);
         }
+        console.log(history);
+        loadGameId();
     }, []);
 
     return(
@@ -168,22 +261,25 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
                 {!game_finished && (
                     <div className="option-field" hidden={game_finished}>
                         <div className="option">
-                            <Button onClick={generateNewChapter} className="center game_buttons" disabled={loading}
+                            <Button onClick={generateNewChapter} className="center game_buttons"
+                                    disabled={loading || viewMode}
                                     variant="contained"
                             >1</Button>
-                            <p className="option-text">{option_1}</p>
+                            <p className="option-text" style={chosenOption === 1 ? {fontWeight: 'bold'} : {}}>{option_1}</p>
                         </div>
                         <div className="option">
-                            <Button onClick={generateNewChapter} className="center game_buttons" disabled={loading}
+                            <Button onClick={generateNewChapter} className="center game_buttons"
+                                    disabled={loading || viewMode}
                                     variant="contained"
                             >2</Button>
-                            <p className="option-text">{option_2}</p>
+                            <p className="option-text" style={chosenOption === 2 ? {fontWeight: 'bold'} : {}}>{option_2}</p>
                         </div>
                         <div className="option">
-                            <Button onClick={generateNewChapter} className="center game_buttons" disabled={loading}
+                            <Button onClick={generateNewChapter} className="center game_buttons"
+                                    disabled={loading || viewMode}
                                     variant="contained"
                             >3</Button>
-                            <p className="option-text">{option_3}</p>
+                            <p className="option-text" style={chosenOption === 3 ? {fontWeight: 'bold'} : {}}>{option_3}</p>
                         </div>
                     </div>
                 )}
@@ -207,18 +303,30 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
                 {viewMode && (
                     <div className="navigation_buttons">
                         <div className="navigation_button">
-                            <IconButton color="primary">
+                            <IconButton color="primary"
+                                        onClick={previousChapter}
+                                        disabled={chapter === 1 || loading}
+                            >
                                 <ArrowCircleLeft/>
                             </IconButton>
                         </div>
-                        <div className="navigation_button">
-                            <Button variant="outlined">Return home</Button>
+                        <div className="navigation_button" onClick={goProfile}>
+                            <Button variant="outlined">Return to profile</Button>
+                        </div>
+                        <div className="navigation_button" onClick={replayGame}>
+                            <Button variant="outlined" disabled={game_finished}>
+                                Replay game
+                            </Button>
                         </div>
                         <div className="navigation_button">
-                            <IconButton color="primary">
+                            <IconButton color="primary"
+                                        onClick={nextChapter}
+                                        disabled={chapter === chapters || loading}
+                            >
                                 <ArrowCircleRight/>
                             </IconButton>
                         </div>
+
                     </div>
                 )}
                 {loading && (

@@ -1,5 +1,10 @@
 import {Button, Card, CardContent} from "@mui/material";
 import React, {useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {StoryModel} from "../models/StoryModel";
+import {basePath} from "../typescripts/Utils";
+import axios from "axios";
+import {getCookie} from "typescript-cookie";
 
 interface GameData{
     gameId: number,
@@ -8,14 +13,26 @@ interface GameData{
 }
 
 const GameInfo: React.FC<GameData> = ({gameId, topic, numOfChapters}) => {
+    const navigate = useNavigate();
     const[viewDisabled, setViewDisabled] = useState(false);
 
     async function loadGame(){
         setViewDisabled(true);
+        localStorage.setItem("numberOfChapters", JSON.stringify(numOfChapters));
+        localStorage.setItem("topic", JSON.stringify(topic));
+        localStorage.setItem("game_id", JSON.stringify(gameId));
 
-
-
+        await axios.post<StoryModel>(basePath + "/game/chapter", {game_id: gameId, chapter: 1},
+            {headers:{
+                    Authorization: "Bearer " + getCookie('sessionId')
+            }}).then((response) => {
+                console.log(response.data);
+                localStorage.setItem("game_data", JSON.stringify(response.data));
+            }).catch((err) => {
+            console.log("Failed to load chapter.", err);
+        })
         setViewDisabled(false);
+        navigate('/view');
     }
 
     return (

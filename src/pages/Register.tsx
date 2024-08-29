@@ -18,6 +18,7 @@ import {RegisterInfo} from "../models/RegisterInfo";
 import axios from "axios";
 import {DatabaseStatus} from "../models/DatabaseStatus";
 import {getCookie, setCookie} from "typescript-cookie";
+import {basePath} from "../typescripts/Utils";
 
 function Register() {
 
@@ -40,9 +41,7 @@ function Register() {
     const[invalidPassword, setInvalidPassword] = useState(false);
     const[usernameExists, setUsernameExists] = useState(false);
     const[emailExists, setEmailExists] = useState(false);
-    const[otherError, setOtherError] = useState(false);
     const[registerFailed, setRegisterFailed] = useState(false);
-    const[errorOccurred, setErrorOccurred] = useState(false);
     const[alreadyLogged, setAlreadyLogged] = useState(false);
 
 
@@ -68,8 +67,8 @@ function Register() {
         setProcessing(true);
         setEmailExists(false);
         setUsernameExists(false);
-        setOtherError(false);
         setRegisterFailed(false);
+        let errorDetected = false;
 
         if(getCookie('sessionId') !== undefined) {
             console.log(getCookie('sessionId'));
@@ -80,42 +79,41 @@ function Register() {
 
         if(username.length === 0) {
             setUsernameError(true);
-            setErrorOccurred(true);
+            errorDetected = true;
         } else setUsernameError(false);
 
         if(email.length === 0) {
             setEmailError(true);
-            setErrorOccurred(true);
+            errorDetected = true;
         } else setEmailError(false);
 
         if(password.length === 0) {
             setPasswordError(true);
-            setErrorOccurred(true);
+            errorDetected = true;
         } else setPasswordError(false);
 
         if(repeat.length === 0) {
             setRepeatError(true);
-            setErrorOccurred(true);
+            errorDetected = true;
         } else setRepeatError(false);
 
         if(password !== repeat) {
             setMismatchError(true);
-            setErrorOccurred(true);
+            errorDetected = true;
         } else setMismatchError(false);
 
         if(!isValidEmail(email)) {
             setInvalidEmail(true);
-            setErrorOccurred(true);
+            errorDetected = true;
         } else setInvalidEmail(false);
 
         if(!isValidPassword(password)){
             setInvalidPassword(true);
-            setErrorOccurred(true);
+            errorDetected = true;
         } else setInvalidPassword(false);
 
-        if(errorOccurred){
+        if(errorDetected){
             setProcessing(false);
-            setErrorOccurred(false);
             return;
         }
 
@@ -125,7 +123,7 @@ function Register() {
             email: email.toLowerCase()
         }
 
-        await axios.post<string>("http://localhost:8080/register", info).then((response) => {
+        await axios.post<string>(basePath + "/register", info).then((response) => {
             setCookie('sessionId', response.data, {expires: 2, sameSite: "lax"});
             navigate('/profile');
         }).catch((err) => {
@@ -136,7 +134,6 @@ function Register() {
             console.log(status);
             if(status.emailExists) setEmailExists(true);
             else if(status.usernameExists) setUsernameExists(true);
-            else setOtherError(true);
         });
 
         setProcessing(false);
@@ -219,7 +216,7 @@ function Register() {
                         <Alert severity="error">{
                             emailExists? "Email already taken" :
                                 (usernameExists? "Username already taken" :
-                                "Unexpected error occurred")
+                                    "Unexpected error occurred")
                         }</Alert>
                     </CardContent>
                 )

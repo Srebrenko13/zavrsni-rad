@@ -7,3 +7,5 @@ export const emptyUser: AccountData = {
     dateCreated: new Date("1.1.1970."),
     loginStatus: false
 }
+
+export const basePath = "http://localhost:8080"

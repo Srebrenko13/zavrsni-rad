@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from "react";
-import {Box, Button, Card, CardContent, TextField} from "@mui/material";
+import {Box, Button, Card, CardContent, Paper, TextField} from "@mui/material";
 import "../stylesheets/Profile.css"
 import axios from "axios";
 import {AccountData} from "../models/AccountData";
 import {getCookie} from "typescript-cookie";
-import {emptyUser} from "../typescripts/Utils"
+import {basePath, emptyUser} from "../typescripts/Utils"
 import {AccountCircle, Cancel, Edit, EmojiPeople, Save} from "@mui/icons-material";
+import {GameInfoData} from "../models/GameInfoData";
 import GameInfo from "../components/GameInfo";
 
 function Profile(){
@@ -24,7 +25,7 @@ function Profile(){
     }
 
     async function editAboutInfo(e: any){
-        axios.post<AccountData>("http://localhost:8080/profile/editAbout", {about: editedAbout},
+        axios.post<AccountData>( basePath + "/profile/editAbout", {about: editedAbout},
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
                 }})
@@ -49,7 +50,7 @@ function Profile(){
     }
 
     useEffect(() => {
-        axios.get<AccountData>("http://localhost:8080/profile",
+        axios.get<AccountData>(basePath + "/profile",
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
                 }})
@@ -58,6 +59,15 @@ function Profile(){
             }).catch((err) => {
                 console.log(err);
             });
+        axios.get<GameInfoData[]>(basePath + "/profile/games",
+            {headers:{
+                    Authorization: "Bearer " + getCookie('sessionId')
+                }})
+            .then((response) => {
+                localStorage.setItem("games", JSON.stringify(response.data));
+            }).catch((err) => {
+                console.log("Failed to load games");
+        });
     }, []);
 
     useEffect(() => {
@@ -132,10 +142,16 @@ function Profile(){
                     <CardContent className="game_id">Game ID</CardContent>
                     <CardContent className="game_topic">Topic</CardContent>
                     <CardContent className="game_description">Number of chapters</CardContent>
-                    <CardContent className="game_view"></CardContent>
+                    <CardContent className="game_header_view"></CardContent>
                     <span/>
                 </Card>
-                <GameInfo gameId={123} topic={"Test test"} numOfChapters={4}/>
+                <div className="history" style={{maxHeight: 350, overflow: 'auto'}}>
+                    {
+                        JSON.parse(localStorage.getItem("games") || "[]").map((game: GameInfoData ) =>
+                            <GameInfo gameId={game.game_id} topic={game.topic} numOfChapters={game.number_of_chapters}/>
+                        )
+                    }
+                </div>
             </Box>
         </Box>
     )

@@ -117,6 +117,16 @@
     justify-content: space-between;
 }
 
+.history{
+    width: 97%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.game_header_view{
+    width: 25%;
+}
+
 .game_id{
     width: 20%;
 }
