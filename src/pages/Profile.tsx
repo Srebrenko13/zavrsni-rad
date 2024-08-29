@@ -29,8 +29,7 @@ function Profile(){
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
                 }})
-            .then((response) => {
-                console.log(response.data);
+            .then(() => {
                 setAboutText(editedAbout);
             }).catch((err) => {
             console.log(err);

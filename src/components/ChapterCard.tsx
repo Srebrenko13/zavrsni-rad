@@ -123,7 +123,6 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
                 }}).then((response) => {
-                        console.log(response.data);
                         saveHistory(response.data);
             }).catch((err) => {
                 console.log("Error getting message history. ", err);
@@ -207,10 +206,9 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
     async function saveGame(e: any){
         setSaving(true);
         const topicData = localStorage.getItem("topic");
-        const numberOfChaptersData = localStorage.getItem("numberOfChapters");
         const chaptersData = localStorage.getItem("chapters");
 
-        let chaptersValue, topicValue, numbersValue;
+        let chaptersValue, topicValue;
 
         if(chaptersData) chaptersValue = JSON.parse(chaptersData);
         else console.log("Chapters error!");
@@ -218,15 +216,12 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
         if(topicData) topicValue = JSON.parse(topicData);
         else topicValue = "I'm feeling lucky!";
 
-        if(numberOfChaptersData) numbersValue = JSON.parse(numberOfChaptersData);
-        else console.log("Numbers error!");
 
-        axios.post("http://localhost:8080/game/save",
+        axios.post(basePath + "/game/save",
             {topic: topicValue, chapters: chaptersValue},
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
-                }}).then((response => {
-            console.log(response.data);
+                }}).then((() => {
             setAlreadySaved(true);
         })).catch((err) => {
             console.log(err);
@@ -248,7 +243,6 @@ const ChapterCard: React.FC<CardProps> = ({viewMode})  => {
             const numberOfChapters = parseInt(gameChapters);
             setChapters(numberOfChapters);
         }
-        console.log(history);
         loadGameId();
     }, []);
 

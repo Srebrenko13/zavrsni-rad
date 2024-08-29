@@ -26,7 +26,6 @@ const GameInfo: React.FC<GameData> = ({gameId, topic, numOfChapters}) => {
             {headers:{
                     Authorization: "Bearer " + getCookie('sessionId')
             }}).then((response) => {
-                console.log(response.data);
                 localStorage.setItem("game_data", JSON.stringify(response.data));
             }).catch((err) => {
             console.log("Failed to load chapter.", err);
